@@ -3,109 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Animated Letter</title>
+    <title>Animated Envelope Opening</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             height: 100vh;
             margin: 0;
-            background-color: #f0f0f0;
         }
-        #letter-container {
+
+        #envelope {
             position: relative;
-            width: 400px;
-            height: 400px;
-            background-color: #fff;
+            width: 200px;
+            height: 150px;
+            background-color: #f0f0f0;
+            border: 2px solid #333;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             overflow: hidden;
+            transition: transform 1s ease-in-out;
         }
-        #letter-content {
+
+        #envelope:before,
+        #envelope:after {
+            content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 20px;
+            width: 60px;
+            height: 2px;
+            background-color: #333;
+        }
+
+        #envelope:before {
+            left: 20px;
+            transform: rotate(45deg);
+        }
+
+        #envelope:after {
+            right: 20px;
+            transform: rotate(-45deg);
+        }
+
+        #letter {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 60%;
+            background-color: #fff;
+            border-radius: 5px;
+            display: none;
             padding: 20px;
             box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
         }
-        #letter-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #ddd;
-        }
-        #letter-body {
-            flex: 1;
-            padding: 20px;
-        }
-        #letter-footer {
-            display: flex;
-            justify-content: flex-end;
-            padding: 20px;
-        }
-        #envelope {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #f0f0f0;
-            transform-origin: top left;
-            transform: rotate(0deg) scale(1);
-            transition: transform 1s;
-        }
-        #envelope.open {
-            transform: rotate(180deg) scale(0.9);
-        }
-        #envelope-flap {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 20px;
-            background-color: #f0f0f0;
-            transform-origin: top left;
-            transform: rotate(0deg);
-            transition: transform 1s;
-        }
-        #envelope-flap.open {
-            transform: rotate(180deg);
-        }
-        #envelope-seal {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 20px;
-            background-color: #f0f0f0;
-            transform-origin: top left;
-            transform: rotate(0deg);
-            transition: transform 1s;
-        }
-        #envelope-seal.open {
-            transform: rotate(180deg);
+
+        #open-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
-    <div id="letter-container">
-        <div id="envelope">
-            <div id="envelope-flap"></div>
-            <div id="envelope-seal"></div>
-        </div>
-        <div id="letter-content">
-            <div id="letter-header">
-                <h2>Subject</h2>
-                <button onclick="openEnvelope()">Open Envelope</button>
-            </div>
-            <div id="letter-body">
-                <p>Dear [Recipient],</p>
-                <
+
+<div id="envelope">
+    <div id="letter">
+        <canvas id="letterCanvas"></canvas>
+    </div>
+</div>
+
+<button id="open-btn" onclick="openEnvelope()">Open Envelope</button>
+
+<script>
+    var open = false;
+
+    function openEnvelope() {
+        document.getElementById('envelope').style.transform = 'rotateX(180deg)';
+        document.getElementById('letter').style.display = 'block';
+        open = true;
+    }
+
+    function closeEnvelope() {
+        document.getElementById('envelope').style.transform = 'rotateX(0deg)';
+        document.getElementById('letter').style.display = 'none';
+        open = false;
+    }
+</script>
+
+<script>
+    var x = 1;
+    var y = 1;
+    var easing = 0.05;
+    var rectX = 148;
+    var rectY = 291;
+    var rectW = 104;
+    var rectH = 63;
+
+    function setup() {
+        createCanvas(400, 400);
+        noLoop();
+    }
+
+    function draw() {
+        background("#303030");
+
+        // Closed Letter
+        noStroke();
+        fill("#E0C389");
+        rect(rectX, rectY, rectW, rectH);
+        fill("#F2E5D2");
+        triangle(148, 291, 200, 329, 252, 291);
+
+        // Open Letter
+        if (open === true) {
+            fill("#F2E5D2");
+            triangle(148, 291, 200, 250, 252, 291);
+
+            let targetX = mouseX;
+            let dx = targetX - x;
+            x += dx * easing;
+
+            let targetY = mouseY;
+            let dy = targetY - y;
+            y += dy * easing;
+
+            fill("#981C26");
+            ellipse(x, y, 20, 20);
+            ellipse(x + 16.6, y, 20, 20);
+            triangle(x + 24.6, y + 6, x + 8.4, y + 23, x - 8, y + 6);
+        }
+    }
+
+    function mouseClicked() {
+        if (open === false) {
+            if (
+                mouseX > rectX &&
+                mouseX < rectX + rectW &&
+                mouseY > rectY &&
+                mouseY < rectY + rectH
+            ) {
+                openEnvelope();
+            }
+        } else {
+            closeEnvelope();
+        }
+    }
+</script>
+
+</body>
+</html>
